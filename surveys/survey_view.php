@@ -28,19 +28,36 @@ $config->sidebar2 = ''; #goes inside right side of page
 $config->nav1["page.php"] = "New Page!"; #add a new page to end of nav1 (viewable this page only)!!
 $config->nav1 = array("page.php"=>"New Page!") + $config->nav1; #add a new page to beginning of nav1 (viewable this page only)!!
 */
+
 # check variable of item passed in - if invalid data, forcibly redirect back to demo_list.php page
 if(isset($_GET['id']) && (int)$_GET['id'] > 0){#proper data must be on querystring
 	 $myID = (int)$_GET['id']; #Convert to integer, will equate to zero if fails
 }else{
 	myRedirect(VIRTUAL_PATH . "surveys/survey_list.php");
 }
-$mySurvey = new Survey($myID);
-if($mySurvey->isValid)
+
+
+
+
+//if there is a result - show it 
+//if there is no result, - show a survey
+// if there is no survey - show a warning message
+
+$myResult = new Result($myID);
+if($myResult->isValid)
 {
-	$config->titleTag = "'" . $mySurvey->Title . "' Survey!";
+	$PageTitle = "'Result to " . $myResult->Title . "' Survey!";
 }else{
-	$config->titleTag = smartTitle(); //use constant 
+	$mySurvey = new Survey($myID);
+	if($mySurvey->isValid)
+	{
+		$config->titleTag = "'" . $mySurvey->Title . "' Survey!";
+	}else{
+		$config->titleTag = smartTitle(); //use constant 
+	} 
 }
+$config->titleTag = $PageTitle;
+
 #END CONFIG AREA ---------------------------------------------------------- 
 
 get_header(); #defaults to theme header or header_inc.php
@@ -49,15 +66,26 @@ get_header(); #defaults to theme header or header_inc.php
 
 <?php
 
-if($mySurvey->isValid)
-{ #check to see if we have a valid SurveyID
-	echo $mySurvey->SurveyID . "<br />";
-	echo $mySurvey->Title . "<br />";
-	echo $mySurvey->Description . "<br />";
-	$mySurvey->showQuestions();
+
+if($myResult->isValid)
+{# check to see if we have a valid SurveyID
+	echo "Survey Title: <b>" . $myResult->Title . "</b><br />";  //show data on page
+	echo "Survey Description: " . $myResult->Description . "<br />";
+	$myResult->showGraph() . "<br />";	//showTallies method shows all questions, answers and tally totals!
 	responseList($myID);
+	unset($myResult);  //destroy object & release resources
 }else{
-	echo "Sorry, no such survey!";	
+	if($mySurvey->isValid)
+	{ #check to see if we have a valid SurveyID
+		echo $mySurvey->SurveyID . "<br />";
+		echo $mySurvey->Title . "<br />";
+		echo $mySurvey->Description . "<br />";
+		$mySurvey->showQuestions();
+		//responseList($myID);
+		echo 'No results so far';
+	}else{
+		echo "Sorry, no such survey!";	
+	}	
 }
 
 get_footer(); #defaults to theme footer or footer_inc.php
