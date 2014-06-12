@@ -38,7 +38,6 @@ if(isset($_GET['id']) && (int)$_GET['id'] > 0){#proper data must be on querystri
 
 
 
-
 //if there is a result - show it 
 //if there is no result, - show a survey
 // if there is no survey - show a warning message
@@ -82,12 +81,13 @@ if($myResult->isValid)
 		echo $mySurvey->Description . "<br />";
 		$mySurvey->showQuestions();
 		//responseList($myID);
+		
 		echo 'No results so far';
 	}else{
 		echo "Sorry, no such survey!";	
 	}	
 }
-
+echo '<br /><a href="survey_take.php?SurveyID='. $myID . '">Take Survey Again!</a>';
 get_footer(); #defaults to theme footer or footer_inc.php
 
 function responseList($myID)
